@@ -31,11 +31,11 @@ class TaskkitTask(models.Model):
     class Meta:
         db_table = 'taskkit_task'
         app_label = 'taskkit'
-        index_together = (
-            ('began', 'group', 'due'),
-            ('done', 'began'),
-            ('name', 'created'),
-        )
+        indexes = [
+            models.Index(fields=['began', 'group', 'due']),
+            models.Index(fields=['done', 'began']),
+            models.Index(fields=['name', 'created']),
+        ]
 
     id: models.CharField = models.CharField(primary_key=True, max_length=255)
     group: models.CharField = models.CharField(max_length=40)
@@ -60,9 +60,9 @@ class TaskkitTaskQueue(models.Model):
     class Meta:
         db_table = 'taskkit_task_queue'
         app_label = 'taskkit'
-        index_together = (
-            ('group', 'due'),
-        )
+        indexes = [
+            models.Index(fields=['group', 'due']),
+        ]
 
     id: models.CharField = models.CharField(primary_key=True, max_length=255)
     group: models.CharField = models.CharField(max_length=40)

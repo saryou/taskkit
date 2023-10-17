@@ -87,7 +87,7 @@ class RegularSchedule(Schedule):
             return all_valid_values
         if isinstance(value, int):
             value = {value}
-        assert all(t in all_valid_values for t in value),\
+        assert all(t in all_valid_values for t in value), \
             f'All values of `{key}` must be in {all_valid_values}.'\
             f' The values are: `{value}`.'
         return value
@@ -141,7 +141,7 @@ class Scheduler(Service):
                  backend: Backend,
                  entries: list[ScheduleEntry],
                  tzinfo: tzinfo):
-        assert len(entries) == len({e.key for e in entries}),\
+        assert len(entries) == len({e.key for e in entries}), \
             'All entries must have unique keys'
         self.name = name
         self.backend = backend

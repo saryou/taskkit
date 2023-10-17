@@ -9,7 +9,7 @@ from .scheduler import ScheduleEntry, Scheduler
 from .signal import SignalCaptured, capture_signals, signal
 from .task import TaskHandler
 from .threads import WorkerThread, ServiceThread
-from .services import RefreshWorkerLifetime, PurgeDeadWorkers,\
+from .services import RefreshWorkerLifetime, PurgeDeadWorkers, \
     RestoreAbandonedTasks, DiscardDisposableTasks
 from .utils import logger
 
@@ -25,7 +25,7 @@ class TaskkitProcess(Process):
                  polling_interval: Union[dict[str, float], float, None] = None,
                  helper_services: bool = True,
                  **kwargs):
-        assert all(n >= 0 for n in num_worker_threads_per_group.values()),\
+        assert all(n >= 0 for n in num_worker_threads_per_group.values()), \
             'All values for num_worker_threads_per_group must be positive int.'
         self.num_worker_threads = num_worker_threads_per_group
         self.backend = backend

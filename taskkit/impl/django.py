@@ -112,7 +112,7 @@ class DjangoBackend(Backend):
 
     def retry_task(self, task: Task):
         with atomic():
-            self.discard_tasks(task.id)
+            self._discard_tasks(task.id)
             db_task = self._task_to_db(task)
             db_task.save()
             self._db_task_to_queue(db_task).save()
@@ -163,6 +163,10 @@ class DjangoBackend(Backend):
         return None
 
     def discard_tasks(self, *task_ids: str):
+        with atomic():
+            self._discard_tasks(*task_ids)
+
+    def _discard_tasks(self, *task_ids: str):
         TaskkitTask.objects.filter(pk__in=task_ids).delete()
         TaskkitTaskQueue.objects.filter(pk__in=task_ids).delete()
 

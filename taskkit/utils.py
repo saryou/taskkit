@@ -1,7 +1,7 @@
 from datetime import datetime, tzinfo
 from logging import getLogger
 from time import time
-from typing import overload, Optional, Union
+from typing import overload, Optional, Union, Callable
 
 
 logger = getLogger('taskkit')
@@ -15,7 +15,21 @@ def local_tz() -> tzinfo:
     return _LOCAL_TZ
 
 
-cur_ts = time
+_cur_ts_impl = time
+
+
+def set_cur_ts_impl(impl: Callable[[], float]):
+    global _cur_ts_impl
+    _cur_ts_impl = impl
+
+
+def reset_cur_ts_impl():
+    global _cur_ts_impl
+    _cur_ts_impl = time
+
+
+def cur_ts() -> float:
+    return _cur_ts_impl()
 
 
 @overload

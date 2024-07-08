@@ -2,7 +2,7 @@ from django.db import models
 
 
 class TaskkitControlEvent(models.Model):
-    class Meta:
+    class Meta:  # pyright: ignore [reportIncompatibleVariableOverride]
         db_table = 'taskkit_control_event'
         app_label = 'taskkit'
 
@@ -11,7 +11,7 @@ class TaskkitControlEvent(models.Model):
 
 
 class TaskkitLock(models.Model):
-    class Meta:
+    class Meta:  # pyright: ignore [reportIncompatibleVariableOverride]
         db_table = 'taskkit_lock'
         app_label = 'taskkit'
 
@@ -19,7 +19,7 @@ class TaskkitLock(models.Model):
 
 
 class TaskkitWorker(models.Model):
-    class Meta:
+    class Meta:  # pyright: ignore [reportIncompatibleVariableOverride]
         db_table = 'taskkit_worker'
         app_label = 'taskkit'
 
@@ -28,7 +28,7 @@ class TaskkitWorker(models.Model):
 
 
 class TaskkitTask(models.Model):
-    class Meta:
+    class Meta:  # pyright: ignore [reportIncompatibleVariableOverride]
         db_table = 'taskkit_task'
         app_label = 'taskkit'
         indexes = [
@@ -57,7 +57,7 @@ class TaskkitTask(models.Model):
 
 
 class TaskkitTaskQueue(models.Model):
-    class Meta:
+    class Meta:  # pyright: ignore [reportIncompatibleVariableOverride]
         db_table = 'taskkit_task_queue'
         app_label = 'taskkit'
         indexes = [
@@ -70,7 +70,7 @@ class TaskkitTaskQueue(models.Model):
 
 
 class TaskkitSchedulerState(models.Model):
-    class Meta:
+    class Meta:  # pyright: ignore [reportIncompatibleVariableOverride]
         db_table = 'taskkit_scheduler_state'
         app_label = 'taskkit'
 

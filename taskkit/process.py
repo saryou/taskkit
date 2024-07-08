@@ -34,9 +34,9 @@ class TaskkitProcess(Process):
         self.schedule_entries = schedule_entries
         self.tzinfo = tzinfo
 
-        if isinstance(polling_interval, float):
+        if isinstance(polling_interval, (float, int)):
             polling_interval = {
-                group: polling_interval
+                group: float(polling_interval)
                 for group in num_worker_threads_per_group.keys()
             }
         elif polling_interval is None:

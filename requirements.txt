@@ -3,7 +3,7 @@ django-stubs==1.13.0
 flake8==7.1.0
 mypy==0.982
 mysqlclient==2.1.1
-pyright==1.1.275
+pyright==1.1.370
 redis==4.3.4
 types-redis==4.3.21.2
 typing-extensions==4.8.0

@@ -79,8 +79,8 @@ class DjangoLock(Lock):
 
 
 class DjangoBackend(Backend):
-    def __init__(self, use_old_queue: bool):
-        self.use_old_queue = use_old_queue
+    def __init__(self, use_queue_table: bool):
+        self.use_queue_table = use_queue_table
 
     def set_worker_ttl(self, worker_ids: set[str], expires_at: float):
         if not worker_ids:
@@ -135,7 +135,7 @@ class DjangoBackend(Backend):
         return {tid: tasks.get(tid) for tid in task_ids}
 
     def assign_task(self, group: str, worker_id: str) -> Optional[Task]:
-        if self.use_old_queue:
+        if not self.use_queue_table:
             return self._assign_task(group, worker_id)
 
         n = 8
@@ -337,5 +337,5 @@ class DjangoBackend(Backend):
         return TaskkitTaskQueue(id=t.id, group=t.group, due=t.due)
 
 
-def make_kit(handler: TaskHandler, use_old_queue: bool = False) -> Kit:
-    return Kit(DjangoBackend(use_old_queue), DjangoEventBridge(), handler)
+def make_kit(handler: TaskHandler, use_queue_table: bool = True) -> Kit:
+    return Kit(DjangoBackend(use_queue_table), DjangoEventBridge(), handler)

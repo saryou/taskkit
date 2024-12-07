@@ -20,7 +20,7 @@ class RedisBackendTests(BackendTests):
 
 
 class DjangoBackendTests(TestCase, BackendTests):
-    backend = django.DjangoBackend()
+    backend = django.DjangoBackend(use_queue_table=True)
 
 
 class RedisKitTests(KitTests):

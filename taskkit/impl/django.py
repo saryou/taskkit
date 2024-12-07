@@ -79,6 +79,9 @@ class DjangoLock(Lock):
 
 
 class DjangoBackend(Backend):
+    def __init__(self, use_queue_table: bool):
+        self.use_queue_table = use_queue_table
+
     def set_worker_ttl(self, worker_ids: set[str], expires_at: float):
         if not worker_ids:
             return
@@ -132,11 +135,29 @@ class DjangoBackend(Backend):
         return {tid: tasks.get(tid) for tid in task_ids}
 
     def assign_task(self, group: str, worker_id: str) -> Optional[Task]:
+        if not self.use_queue_table:
+            return self._assign_task(group, worker_id)
+
         n = 8
         while True:
             pks = list(
                 TaskkitTaskQueue.objects
                 .filter(group=group, due__lt=cur_ts())
+                .values_list('pk', flat=True)
+                .order_by('due')[:n])
+            for pk in pks:
+                if (task := self._assign(pk, worker_id)):
+                    return task
+            if len(pks) < n:
+                return None
+            n *= 2
+
+    def _assign_task(self, group: str, worker_id: str) -> Optional[Task]:
+        n = 8
+        while True:
+            pks = list(
+                TaskkitTask.objects
+                .filter(began__isnull=True, group=group, due__lt=cur_ts())
                 .values_list('pk', flat=True)
                 .order_by('due')[:n])
             for pk in pks:
@@ -316,5 +337,5 @@ class DjangoBackend(Backend):
         return TaskkitTaskQueue(id=t.id, group=t.group, due=t.due)
 
 
-def make_kit(handler: TaskHandler) -> Kit:
-    return Kit(DjangoBackend(), DjangoEventBridge(), handler)
+def make_kit(handler: TaskHandler, use_queue_table: bool = True) -> Kit:
+    return Kit(DjangoBackend(use_queue_table), DjangoEventBridge(), handler)

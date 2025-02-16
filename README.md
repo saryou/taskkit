@@ -36,15 +36,19 @@ Taskkit uses a **backend-based queue** to manage tasks. Each worker:
 ### Proven Performance
 At **Nailbook**, we use **Amazon Aurora** as our **main database**.  
 Taskkit runs on this **shared Aurora instance**, which costs approximately **$2,000/month including all associated costs**.  
-Despite running alongside other database operations, this setup has successfully processed **over 100 tasks per second** without issues.
+Despite running alongside other database operations, this setup **has been observed to process up to 100 tasks per second** without issues.
 
 ## Limitations
 
-Taskkit has been running in production at Nailbook for over two years. However, it has only been extensively tested in a Django-based backend using Aurora MySQL. **Other backends, such as Redis, may not work as expected.**  
+Taskkit has been running in production at Nailbook for over two years. However, it has been extensively tested **only** in a Django-based backend using **Aurora MySQL**.  
+
+While an experimental Redis implementation is available, **it has never been used in production, and its stability is not guaranteed**. Other backends may also not work as expected.
 
 As a result, **Taskkit remains highly experimental**, and its functionality outside of this specific environment has not been thoroughly verified. **Use at your own discretion.**
 
-## Installation
+## How to use
+
+### Installation
 
 You can install Taskkit via pip:
 
@@ -52,11 +56,10 @@ You can install Taskkit via pip:
 pip install taskkit
 ```
 
-## How to use
-
 ### 1. Implement TaskHandler
 
-This is the core part.
+Each task must be handled by a `TaskHandler` implementation.  
+This class defines how Taskkit should process tasks, encode/decode data, and handle retries.
 
 ```python
 import json
@@ -65,8 +68,9 @@ from taskkit import TaskHandler, Task, DiscardTask
 
 
 class Handler(TaskHandler):
-    def handle(self, task: Task):
+    def handle(self, task: Task) -> Any:
         # Use `tagk.group` and `task.name` to determine how to handle the task
+        # If it returns any data, it must be encodable by `self.encode_result`.
         if task.group == '...':
             if task.name == 'foo':
                 # decode the data which encoded by `self.encode_data` if needed
@@ -107,9 +111,11 @@ class Handler(TaskHandler):
 
 ### 2. Make Kit
 
-#### Use redis impl
+#### Using Redis Backend (Experimental)
 
-You can use redis backend like this:
+An experimental Redis backend is available, but **it has never been used in production, and its stability is not guaranteed**.
+
+If you would like to try it, you can use the following setup:
 
 ```python
 from redis.client import Redis
@@ -122,7 +128,7 @@ redis = Redis(host=REDIS_HOST, port=REDIS_PORT)
 kit = make_kit(redis, Handler())
 ```
 
-#### Use django impl
+#### Using Django Backend
 
 1. Add `'taskkit.contrib.django'` to `INSTALLED_APPS` in the settings
 2. Run `python manage.py migrate`

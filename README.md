@@ -1,16 +1,68 @@
-# taskkit
+# Taskkit
 
-pypi: https://pypi.org/project/taskkit/
+**Taskkit** is an experimental, lightweight distributed task runner designed as an alternative to [Celery](https://github.com/celery/celery), with improved resource efficiency for handling asynchronous tasks.
 
-## Overview
+- **GitHub**: [https://github.com/saryou/taskkit](https://github.com/saryou/taskkit)  
+- **PyPI**: [https://pypi.org/project/taskkit/](https://pypi.org/project/taskkit/)
 
-`taskkit` is a distributed task runner.
+
+## Motivation
+
+At [Nailbook](https://nailbook.jp/), we initially used [Celery](https://github.com/celery/celery) for asynchronous task processing. However, Celery assigns one process per worker, which resulted in inefficient resource utilization—especially since most tasks in Nailbook are I/O-bound.
+
+To solve this issue, we developed **Taskkit**, a task runner that enables worker execution on a per-thread basis. This approach optimizes resource usage, making it more efficient for I/O-heavy workloads.
+
+## Design Philosophy
+
+Taskkit is designed with an extremely **simple API** in mind.  
+All major APIs **(except for encoding/decoding of task data)** are fully type-annotated using Python’s `typing` module.  
+
+This ensures:
+- **Low implementation cost** – The API remains lightweight and easy to integrate.
+- **Readability & predictability** – Developers can quickly understand the expected behavior of tasks.
+
+By prioritizing type safety and simplicity, Taskkit provides a clear and minimalistic approach to distributed task execution.
+
+## Implementation Details
+
+Taskkit uses a **backend-based queue** to manage tasks. Each worker:
+1. Fetches the **oldest due task** from the queue.
+2. Assigns the task to itself for execution.
+3. Processes the task asynchronously.
+
+### Scalability Considerations
+
+- This approach allows **scaling by adding more workers**, which increases processing capacity.
+- However, **the backend queue and the exclusivity of task assignment can become bottlenecks** under high loads.
+
+### Proven Performance
+
+One production deployment of Taskkit operates on a shared Amazon Aurora database cluster.
+This configuration typically incurs a total cost of around $2,000 per month, depending on scale and usage.
+In this environment, Taskkit has been observed to reliably process up to 100 tasks per second alongside other database operations.
+
+## Limitations
+
+Taskkit has been running in production at Nailbook for over two years. However, it has been extensively tested **only** in a Django-based backend using **Aurora MySQL**.  
+
+While an experimental Redis implementation is available, **it has never been used in production, and its stability is not guaranteed**. Other backends may also not work as expected.
+
+As a result, **Taskkit remains highly experimental**, and its functionality outside of this specific environment has not been thoroughly verified. **Use at your own discretion.**
 
 ## How to use
 
+### Installation
+
+You can install Taskkit via pip:
+
+```sh
+pip install taskkit
+```
+
 ### 1. Implement TaskHandler
 
-This is the core part.
+Each task must be handled by a `TaskHandler` implementation.  
+This class defines how Taskkit should process tasks, encode/decode data, and handle retries.
 
 ```python
 import json
@@ -19,8 +71,9 @@ from taskkit import TaskHandler, Task, DiscardTask
 
 
 class Handler(TaskHandler):
-    def handle(self, task: Task):
+    def handle(self, task: Task) -> Any:
         # Use `tagk.group` and `task.name` to determine how to handle the task
+        # If it returns any data, it must be encodable by `self.encode_result`.
         if task.group == '...':
             if task.name == 'foo':
                 # decode the data which encoded by `self.encode_data` if needed
@@ -61,9 +114,11 @@ class Handler(TaskHandler):
 
 ### 2. Make Kit
 
-#### Use redis impl
+#### Using Redis Backend (Experimental)
 
-You can use redis backend like this:
+An experimental Redis backend is available, but **it has never been used in production, and its stability is not guaranteed**.
+
+If you would like to try it, you can use the following setup:
 
 ```python
 from redis.client import Redis
@@ -76,7 +131,7 @@ redis = Redis(host=REDIS_HOST, port=REDIS_PORT)
 kit = make_kit(redis, Handler())
 ```
 
-#### Use django impl
+#### Using Django Backend
 
 1. Add `'taskkit.contrib.django'` to `INSTALLED_APPS` in the settings
 2. Run `python manage.py migrate`

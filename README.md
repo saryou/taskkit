@@ -1,10 +1,29 @@
-# taskkit
+# Taskkit
 
-pypi: https://pypi.org/project/taskkit/
+[![PyPI](https://img.shields.io/pypi/v/taskkit)](https://pypi.org/project/taskkit/)  
+[![GitHub](https://img.shields.io/github/stars/saryou/taskkit?style=social)](https://github.com/saryou/taskkit)
 
-## Overview
+**Taskkit** is an experimental, lightweight distributed task runner designed as an alternative to [Celery](https://github.com/celery/celery), with improved resource efficiency for handling asynchronous tasks.
 
-`taskkit` is a distributed task runner.
+## Motivation
+
+At [Nailbook](https://nailbook.jp/), we initially used [Celery](https://github.com/celery/celery) for asynchronous task processing. However, Celery assigns one process per worker, which resulted in inefficient resource utilization—especially since most tasks in Nailbook are I/O-bound.
+
+To solve this issue, we developed **Taskkit**, a task runner that enables worker execution on a per-thread basis. This approach optimizes resource usage, making it more efficient for I/O-heavy workloads.
+
+## Limitations
+
+Taskkit has been running in production at Nailbook for over two years. However, it has only been extensively tested in a Django-based backend using MySQL. **Other backends, such as Redis, may not work as expected.**  
+
+As a result, **Taskkit remains highly experimental**, and its functionality outside of this specific environment has not been thoroughly verified. **Use at your own discretion.**
+
+## Installation
+
+You can install Taskkit via pip:
+
+```sh
+pip install taskkit
+```
 
 ## How to use
 

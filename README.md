@@ -11,9 +11,36 @@ At [Nailbook](https://nailbook.jp/), we initially used [Celery](https://github.c
 
 To solve this issue, we developed **Taskkit**, a task runner that enables worker execution on a per-thread basis. This approach optimizes resource usage, making it more efficient for I/O-heavy workloads.
 
+## Design Philosophy
+
+Taskkit is designed with an extremely **simple API** in mind.  
+All major APIs **(except for encoding/decoding of task data)** are fully type-annotated using Python’s `typing` module.  
+
+This ensures:
+- **Low implementation cost** – The API remains lightweight and easy to integrate.
+- **Readability & predictability** – Developers can quickly understand the expected behavior of tasks.
+
+By prioritizing type safety and simplicity, Taskkit provides a clear and minimalistic approach to distributed task execution.
+
+## Implementation Details
+
+Taskkit uses a **backend-based queue** to manage tasks. Each worker:
+1. Fetches the **oldest due task** from the queue.
+2. Assigns the task to itself for execution.
+3. Processes the task asynchronously.
+
+### Scalability Considerations
+- This approach allows **scaling by adding more workers**, which increases processing capacity.
+- However, **the backend queue and the exclusivity of task assignment can become bottlenecks** under high loads.
+
+### Proven Performance
+At **Nailbook**, we use **Amazon Aurora** as our **main database**.  
+Taskkit runs on this **shared Aurora instance**, which costs approximately **$2,000/month including all associated costs**.  
+Despite running alongside other database operations, this setup has successfully processed **over 100 tasks per second** without issues.
+
 ## Limitations
 
-Taskkit has been running in production at Nailbook for over two years. However, it has only been extensively tested in a Django-based backend using MySQL. **Other backends, such as Redis, may not work as expected.**  
+Taskkit has been running in production at Nailbook for over two years. However, it has only been extensively tested in a Django-based backend using Aurora MySQL. **Other backends, such as Redis, may not work as expected.**  
 
 As a result, **Taskkit remains highly experimental**, and its functionality outside of this specific environment has not been thoroughly verified. **Use at your own discretion.**
 

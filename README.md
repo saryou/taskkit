@@ -1,9 +1,10 @@
 # Taskkit
 
-[![PyPI](https://img.shields.io/pypi/v/taskkit)](https://pypi.org/project/taskkit/)  
-[![GitHub](https://img.shields.io/github/stars/saryou/taskkit?style=social)](https://github.com/saryou/taskkit)
-
 **Taskkit** is an experimental, lightweight distributed task runner designed as an alternative to [Celery](https://github.com/celery/celery), with improved resource efficiency for handling asynchronous tasks.
+
+- **GitHub**: [https://github.com/saryou/taskkit](https://github.com/saryou/taskkit)  
+- **PyPI**: [https://pypi.org/project/taskkit/](https://pypi.org/project/taskkit/)
+
 
 ## Motivation
 
